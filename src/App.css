@@ -1,10 +1,10 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.App {
+  width: 100%;
+  height: auto;
 }
 
 body {
+  display: block;
   margin: 8px;
+  padding: 0;
 }
-
