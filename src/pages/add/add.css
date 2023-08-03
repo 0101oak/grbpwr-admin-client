@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap');
+
+h2 {
+  font-size: 1.5em;
+  font-family: Roboto, sans-serif;
+  font-weight: bold;
+  text-decoration: none;
+  margin-block-start: 0.83em;
+  margin-block-end: 0.83em;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+p {
+  font-family: Roboto, sans-serif;
+  font-size: 16px;
+}
+
+.admin-wrapper {
+  width: 80%;
+  margin: 80px auto;
+}
+
+.title {
+  margin: 0 0 20px;
+}
+
+.input-title {
+  padding: 10px 0 0;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid #000;
+}
+
+.content {
+  width: 100%;
+  padding: 10px;
+  height: 27px;
+  resize: none;
+}
+
+.input-cont {
+  width: 100%;
+  display: flex;
+}
+.cont {
+  padding: 10px;
+  height: 27px;
+  resize: none;
+  width: 100%;
+}
+
+/* price section */
+
+.price-title {
+  width: 100%;
+  padding: 10px 0 0;
+}
+
+.price-title_text {
+  margin: 0 0 20px;
+}
+
+.currency-wrapper {
+  padding: 20px 0 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  column-gap: 40px;
+  row-gap: 10px;
+}
+
+.cur {
+  margin: 0 0 8px;
+}
+
+.currency {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.price {
+  padding: 10px;
+  height: 27px;
+  border: 1px solid #000;
+  width: 100%;
+  resize: none;
+}
+
+/* size section */
+
+.size-wrapper {
+  padding: 10px 0 0;
+  width: 100%;
+}
+
+.size-wrapper_text {
+  margin: 0 0 20px;
+}
+
+.size-container {
+  padding: 20px 0 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  column-gap: 40px;
+  row-gap: 10px;
+}
+
+.size {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.size-title {
+  margin: 0 0 5px;
+}
+
+.input-size {
+  padding: 10px;
+  height: 27px;
+  border: 1px solid #000;
+  width: 100%;
+  resize: none;
+}
+
+/* description */
+.description-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.description {
+  padding: 10px 0 0;
+}
+
+.input-description {
+  padding: 10px;
+  height: 27px;
+  border: 1px solid #000;
+  width: 100%;
+  resize: none;
+}
+
+/* categories */
+
+.categories {
+  padding: 10px 0 0;
+}
+
+.categories-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.categories-title {
+  width: 100%;
+}
+
+.cat {
+  margin: 0;
+  padding: 0 0 5px;
+}
+
+.input-categories {
+  padding: 10px;
+  height: 27px;
+  border: 1px solid #000;
+  width: 100%;
+  resize: none;
+}
+
+/* button */
+
+.button {
+  margin: 50px 0 0;
+  padding: 0 0 20px;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  width: 100%;
+}
+
+.btn {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.line {
+  margin: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #000;
+}
+
