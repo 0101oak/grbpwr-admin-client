@@ -5,6 +5,8 @@ import Navbar from './components/navbar';
 import Add from './pages/add/add';
 import Product from './pages/product/product';
 
+
+
 export default function Admin() {
   return (
     <div className="App">
