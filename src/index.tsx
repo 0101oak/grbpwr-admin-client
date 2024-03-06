@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 // import { StrictMode } from 'react'; -- TODO: what is it used for
 import { createRoot } from 'react-dom/client';
@@ -14,6 +14,17 @@ import { Product } from 'components/managers/product/product';
 import { AddProducts } from 'components/managers/product/addProduct';
 import { PageProduct } from 'components/managers/product/pageProduct';
 import { ProductId } from 'components/managers/product/componentsOfPageProduct/productID';
+import { Hero } from 'components/managers/hero/hero';
+import { MediaPicker } from 'components/managers/hero/mediaPicker';
+import { GetHero } from 'components/managers/hero/getHero';
+import { Promo } from 'components/managers/promo/promo';
+import { GetPromo } from 'components/managers/promo/getPromo';
+import { MainArchive } from 'components/managers/archive/mainArchive';
+import { Archive } from 'components/managers/archive/archive';
+import { GetArchive } from 'components/managers/archive/getArchive';
+import { Settings } from 'components/managers/settings/settings';
+import { Orders } from 'components/managers/orders/orders';
+import { OrderId } from 'components/managers/orders/orderId';
 import 'styles/global.scss';
 
 const container = document.getElementById('root') ?? document.body;
@@ -31,9 +42,21 @@ const routes: Route<DefaultGenerics>[] = [
   { path: ROUTES.addProduct, element: <AddProducts /> },
   { path: ROUTES.pagedProduct, element: <PageProduct /> },
   { path: ROUTES.singleProduct, element: <ProductId /> },
+  { path: ROUTES.hero, element: <Hero /> },
+  { path: ROUTES.addHero, element: <MediaPicker /> },
+  { path: ROUTES.getHero, element: <GetHero /> },
+  { path: ROUTES.promo, element: <Promo /> },
+  { path: ROUTES.getPromo, element: <GetPromo /> },
+  { path: ROUTES.archive, element: <MainArchive /> },
+  { path: ROUTES.createArchive, element: <Archive /> },
+  { path: ROUTES.getArchive, element: <GetArchive /> },
+  { path: ROUTES.settings, element: <Settings /> },
+  { path: ROUTES.orders, element: <Orders /> },
+  { path: ROUTES.ordersById, element: <OrderId /> },
 ];
 
 root.render(
+  // <StrictMode>
   <ContextProvider>
     <QueryClientProvider client={queryClient}>
       <Router location={location} routes={routes}>
@@ -41,4 +64,5 @@ root.render(
       </Router>
     </QueryClientProvider>
   </ContextProvider>,
+  // </StrictMode>,
 );

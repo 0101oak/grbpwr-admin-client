@@ -1,14 +1,14 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import update from 'immutability-helper';
-import { Layout } from 'components/layout/layout';
-import { common_ProductNew, AddProductRequest, common_GenderEnum } from 'api/proto-http/admin';
-import { addProduct } from 'api/admin';
-import { Thumbnail } from './componentsOfProduct/thumbnail';
+import { Layout } from 'components/login/layout';
+import { common_ProductNew, AddProductRequest, common_Dictionary } from 'api/proto-http/admin';
+import { addProduct, getDictionary } from 'api/admin';
 import { Sizes } from './componentsOfProduct/sizes';
 import { Tags } from './componentsOfProduct/tag';
 import { Categories } from './componentsOfProduct/categories';
 import { ColorHEX } from './componentsOfProduct/colorHEX';
 import { InputField } from './componentsOfProduct/inputFields';
+import { MediaSelector } from './componentsOfProduct/mediaSelector';
 import styles from 'styles/addProd.scss';
 
 export const initialProductState: common_ProductNew = {
@@ -61,7 +61,25 @@ export const AddProducts: FC = () => {
     handleChange(e, setProduct);
   };
 
-  const [gender, setGender] = useState<common_GenderEnum[] | undefined>([]);
+  const [dictionary, setDictionary] = useState<common_Dictionary>();
+
+  useEffect(() => {
+    const storedDictionary = localStorage.getItem('dictionary');
+    if (storedDictionary) {
+      setDictionary(JSON.parse(storedDictionary));
+    } else {
+      const fetchDictionary = async () => {
+        try {
+          const response = await getDictionary({});
+          setDictionary(response.dictionary);
+          localStorage.setItem('dictionary', JSON.stringify(response.dictionary));
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchDictionary();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,13 +105,6 @@ export const AddProducts: FC = () => {
       setProduct(initialProductState);
       console.error('Error adding product:', error);
     }
-  };
-
-  const updateTags = (updatedTags: any) => {
-    setProduct((prevProduct) => ({
-      ...prevProduct,
-      tags: updatedTags, // Update the tags in the product state
-    }));
   };
 
   return (
@@ -125,6 +136,7 @@ export const AddProducts: FC = () => {
           name='price'
           value={product.product?.price}
           onChange={handleInputChange}
+          type='number'
         />
 
         <InputField
@@ -132,6 +144,7 @@ export const AddProducts: FC = () => {
           name='salePercentage'
           value={product.product?.salePercentage}
           onChange={handleInputChange}
+          type='number'
         />
 
         <InputField
@@ -152,10 +165,12 @@ export const AddProducts: FC = () => {
             onChange={handleInputChange}
             className={styles.product_input}
           >
-            {/* TODO: how do it dynamically */}
-            <option value='GENDER_ENUM_MALE'>Male</option>
-            <option value='GENDER_ENUM_FEMALE'>Female</option>
-            <option value='GENDER_ENUM_UNISEX'>Unisex</option>
+            <option value=''>select gender</option>
+            {dictionary?.genders?.map((gender, id) => (
+              <option value={gender.id} key={id}>
+                {gender.name?.replace('GENDER_ENUM_', '')}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -167,8 +182,9 @@ export const AddProducts: FC = () => {
             name='description'
             id='descrip'
             value={product.product?.description}
-            cols={30}
-            rows={10}
+            cols={1}
+            rows={2}
+            style={{ width: '150px' }}
             onChange={handleInputChange}
           ></textarea>
         </div>
@@ -189,22 +205,21 @@ export const AddProducts: FC = () => {
 
         <ColorHEX product={product} setProduct={setProduct} />
 
-        <InputField
-          label='THUMBNAIL'
-          name='thumbnail'
-          value={product.product?.thumbnail}
-          onChange={handleInputChange}
+        <MediaSelector
+          product={product}
+          setProduct={setProduct}
+          handleInputChange={handleInputChange}
         />
 
-        <Thumbnail product={product} setProduct={setProduct} />
+        <Categories product={product} setProduct={setProduct} dictionary={dictionary} />
 
-        <Categories product={product} setProduct={setProduct} />
+        <Sizes setProduct={setProduct} dictionary={dictionary} product={product} />
 
-        <Sizes product={product} setProduct={setProduct} />
+        <Tags setProduct={setProduct} product={product} />
 
-        <Tags updateTags={updateTags} />
-
-        <button type='submit'>SUBMIT</button>
+        <button type='submit' className={styles.submit}>
+          SUBMIT
+        </button>
       </form>
     </Layout>
   );

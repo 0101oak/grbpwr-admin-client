@@ -1,205 +1,294 @@
-import React, { FC, useState, useEffect } from 'react';
-import { Layout } from 'components/layout/layout';
-import { common_ProductFull, common_Size } from 'api/proto-http/admin';
+/* eslint-disable no-case-declarations */
+import React, { FC, useEffect, useReducer } from 'react';
+import { reducer, initialState } from './componentsOfProductID/productIdReducer';
+import { Layout } from 'components/login/layout';
+import { ProductFields } from './componentsOfProductID/productIdReducer';
 import { getProductByID, getDictionary } from 'api/admin';
-import { AddMediaByID } from './addMediaById';
-import { updateName, updateSku, updatePreorder, updateColors } from 'api/byID';
+import { ProductInformation } from './componentsOfProductID/prodyctInformation';
+import { ProductMediaContainer } from './componentsOfProductID/productMediaContainer';
+import {
+  updateName,
+  updateSku,
+  updatePreorder,
+  updateColors,
+  updateCountry,
+  updateBrand,
+  updateGender,
+  updateThumbnail,
+  updatePrice,
+  updateSale,
+  updateCategory,
+  updateSize,
+  updateMeasurement,
+  updateDescription,
+  updateTag,
+  deleteTag,
+  updateHide,
+} from 'api/byID';
 import queryString from 'query-string';
 import styles from 'styles/productID.scss';
 
 export const ProductId: FC = () => {
   const queryParams = queryString.parse(window.location.search);
   const productId = queryParams.productId as string;
-  const [product, setProuct] = useState<common_ProductFull | undefined>(undefined);
-  const [sizeDictionary, setSizeDictionary] = useState<common_Size[]>([]);
-  const [productFields, setProductFields] = useState({
-    newProductName: '',
-    newSku: '',
-    newPreorder: '',
-    newColor: '',
-    newColorHEX: '',
-  });
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-    setProductFields((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    dispatch({
+      type: 'UPDATE_PRODUCT_FIELD',
+      fieldName: name as keyof ProductFields,
+      value,
+    });
   };
-
-  const updateProductDetails = async () => {
-    if (!product || !product.product?.id) {
-      console.error('Product ID is not available');
+  // TODO: useCallback ???
+  const updateProduct = async (fieldNameToUpdate: string) => {
+    if (!state.product?.product?.id) {
+      console.error('Product ID is undefined');
       return;
     }
 
+    const productId = state.product.product.id;
+    const value = state.productFields[fieldNameToUpdate as keyof ProductFields];
+
     try {
-      const { newProductName, newSku, newPreorder, newColor, newColorHEX } = productFields;
-
-      if (newProductName !== '') {
-        await updateName({ productId: product.product.id, name: newProductName });
+      switch (fieldNameToUpdate) {
+        case 'newProductName':
+          await updateName({ productId, name: value as string });
+          break;
+        case 'newSku':
+          await updateSku({ productId, sku: value as string });
+          break;
+        case 'newPreorder':
+          await updatePreorder({ productId, preorder: value as string });
+          break;
+        case 'newColor':
+          if (state.productFields.newColor && state.productFields.newColorHEX) {
+            await updateColors({
+              productId,
+              color: state.productFields.newColor,
+              colorHex: state.productFields.newColorHEX,
+            });
+          }
+          break;
+        case 'newCountry':
+          await updateCountry({ productId, countryOfOrigin: value as string });
+          break;
+        case 'newBrand':
+          await updateBrand({ productId, brand: value as string });
+          break;
+        case 'newGender':
+          await updateGender({
+            productId,
+            gender: state.productFields.newGender,
+          });
+          break;
+        case 'newThumbnail':
+          await updateThumbnail({ productId, thumbnail: value as string });
+          break;
+        case 'newPrice':
+          const decimalPrice = createDecimalObject(state.productFields.newPrice);
+          await updatePrice({ productId, price: decimalPrice });
+          break;
+        case 'newSale':
+          const decimalSale = createDecimalObject(state.productFields.newSale);
+          await updateSale({ productId, sale: decimalSale });
+          break;
+        case 'newCategory':
+          await updateCategory({ productId, categoryId: Number(value) });
+          break;
+        case 'newDescription':
+          await updateDescription({ productId, description: value as string });
+          break;
+        case 'newTag':
+          await updateTag({ productId, tag: value as string });
+          break;
+        default:
+          console.warn(`No update function for field: ${fieldNameToUpdate}`);
       }
 
-      if (newSku !== '') {
-        await updateSku({ productId: product.product.id, sku: newSku });
-      }
+      dispatch({
+        type: 'UPDATE_PRODUCT_FIELD',
+        fieldName: fieldNameToUpdate,
+        value: value,
+      });
 
-      if (newPreorder !== '') {
-        await updatePreorder({ productId: product.product.id, preorder: newPreorder });
-      }
-
-      if (newColor !== '') {
-        await updateColors({
-          productId: product.product.id,
-          color: newColor,
-          colorHex: newColorHEX,
-        });
-      }
-
-      updateLocalProductDetails(
-        newProductName !== '' ? newProductName : null,
-        newSku !== '' ? newSku : null,
-        newPreorder !== '' ? newPreorder : null,
-        newColor !== '' ? newColor : null,
-        newColorHEX !== '' ? newColorHEX : undefined,
-      );
+      console.log(`Product field ${fieldNameToUpdate} updated successfully`);
     } catch (error) {
-      console.error('Error updating product', error);
+      console.error(`Error updating product field ${fieldNameToUpdate}:`, error);
     }
   };
 
-  const updateLocalProductDetails = (
-    newName: string | null,
-    newSku: string | null,
-    newPreorder: string | null,
-    newColor: string | null,
-    newColorHEX: string | undefined,
-  ) => {
-    setProuct((prevProduct) => {
-      if (!prevProduct || !prevProduct.product || !prevProduct.product.productInsert) {
-        return prevProduct;
+  function createDecimalObject(decimalString: string) {
+    if (!decimalString) return { value: '0' };
+    return { value: decimalString };
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const dictionaryResponse = await getDictionary({});
+        dispatch({ type: 'SET_GENDERS', payload: dictionaryResponse.dictionary?.genders || [] });
+        dispatch({ type: 'SET_SIZES', payload: dictionaryResponse.dictionary?.sizes || [] });
+        dispatch({
+          type: 'SET_MEASUREMENTS',
+          payload: dictionaryResponse.dictionary?.measurements || [],
+        });
+      } catch (error) {
+        console.error(error);
       }
-      // TODO: spreading ?
-      const updatedProduct: common_ProductFull = {
-        ...prevProduct,
-        product: {
-          ...prevProduct.product,
-          productInsert: {
-            ...prevProduct.product.productInsert,
-            name: newName || prevProduct.product.productInsert.name,
-            sku: newSku || prevProduct.product.productInsert.sku,
-            preorder: newPreorder || prevProduct.product.productInsert.preorder,
-            color: newColor || prevProduct.product.productInsert.color,
-            colorHex: newColorHEX || prevProduct.product.productInsert.colorHex,
-          },
-        },
-      };
-      return updatedProduct;
-    });
-  };
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getProductByID({ id: Number(productId) });
-        setProuct(response.product);
-      } catch (error) {
-        console.error('Error fetching product data:', error);
-      }
-    };
-
-    fetchData();
-  }, [productId]);
-
-  useEffect(() => {
-    const fetchSize = async () => {
-      try {
-        const response = await getDictionary({});
-        setSizeDictionary(response.dictionary?.sizes || []);
+        dispatch({ type: 'SET_PRODUCT', payload: response.product });
       } catch (error) {
         console.error(error);
       }
     };
-    fetchSize();
-  }, []);
+    fetchData();
+  }, [state.productFields]);
 
   const getSizeName = (sizeId: number | undefined): string => {
-    const size = sizeDictionary.find((s) => s.id === sizeId);
+    const size = state.sizes.find((s) => s.id === sizeId);
     if (size && size.name) {
       return size.name.replace('SIZE_ENUM_', '');
     }
     return 'size not found';
   };
 
+  const getMeasuremntName = (measurementId: number | undefined): string => {
+    const measure = state.measurements?.find((m) => m.id === measurementId);
+    if (measure && measure.name) {
+      return measure.name.replace('MEASUREMENT_NAME_ENUM_', '');
+    }
+    return 'size not found';
+  };
+
+  const toogleAddMedia = () => {
+    dispatch({ type: 'TOGGLE_ADD_MEDIA' });
+  };
+
+  const handleNewTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'SET_NEW_TAG', payload: e.target.value });
+  };
+
+  const deleteUpdatedTag = async (tag: string) => {
+    if (tag && state.product?.product?.id) {
+      try {
+        await deleteTag({ productId: state.product.product.id, tag });
+        dispatch({ type: 'REMOVE_TAG', tag });
+      } catch (error) {
+        console.error('Error deleting tag:', error);
+      }
+    }
+  };
+
+  const toggleHideProduct = async (
+    productId: number | undefined,
+    currentHideStatus: boolean | undefined,
+  ) => {
+    if (productId !== undefined) {
+      try {
+        await updateHide({ id: productId, hide: !currentHideStatus });
+        dispatch({
+          type: 'TOGGLE_HIDE_PRODUCT',
+          payload: { productId, hideStatus: !currentHideStatus },
+        });
+      } catch (error) {
+        console.error('Error toggling product hide status:', error);
+      }
+    }
+  };
+
+  const handleMeasurementChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    sizeId: number,
+    measurementNameId: number,
+  ) => {
+    const key = `${sizeId}-${measurementNameId}`;
+    dispatch({
+      type: 'UPDATE_MEASUREMENT',
+      sizeId,
+      measurementNameId,
+      value: e.target.value,
+    });
+  };
+  const updateMeasurementValue = async (sizeId: number, measurementNameId: number) => {
+    const key = `${sizeId}-${measurementNameId}`;
+    const measurementValue = state.measurement[key];
+    if (!sizeId || !measurementNameId || !measurementValue || !state.product?.product?.id) return;
+
+    try {
+      const decimalValue = createDecimalObject(measurementValue);
+      await updateMeasurement({
+        productId: state.product.product.id,
+        sizeId,
+        measurementNameId,
+        measurementValue: decimalValue,
+      });
+    } catch (error) {
+      console.error('Error updating measurement:', error);
+    }
+  };
+
+  const handleSizeChange = (sizeId: number | undefined, quantity: number | undefined) => {
+    dispatch({
+      type: 'UPDATE_SIZE',
+      sizeId,
+      quantity,
+    });
+  };
+
+  const updateSizeQuantity = async (sizeId: number | undefined, quantity: number | undefined) => {
+    if (
+      typeof sizeId === 'undefined' ||
+      typeof quantity === 'undefined' ||
+      !state.product?.product?.id
+    )
+      return;
+    try {
+      await updateSize({ productId: state.product?.product?.id, sizeId, quantity });
+    } catch (error) {
+      console.error('Error updating size:', error);
+    }
+  };
+
   return (
     <Layout>
       <div className={styles.product_id_full_content}>
-        <div className={styles.img_grid}>
-          <div className={styles.main_img_container}>
-            <img
-              src={product?.product?.productInsert?.thumbnail}
-              alt='thumbnail'
-              className={styles.main_img}
-            />
-          </div>
-          <ul className={styles.product_by_id_media_list}>
-            {product?.media?.map((media, index) => (
-              <li key={index}>
-                <p>{index + 1}</p>
-                <img src={media.productMediaInsert?.compressed} alt='' />
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className={styles.product_id_information}>
-          <h3>{product?.product?.productInsert?.name}</h3>
-          <input
-            type='text'
-            name='newProductName'
-            value={productFields.newProductName}
-            onChange={handleChange}
-          />
-          <button onClick={() => updateProductDetails()}>+</button>
-          <br />
+        <ProductMediaContainer
+          product={state.product}
+          toggleAddMedia={toogleAddMedia}
+          showAddMedia={state.showAddMedia}
+        />
 
-          <h3>{product?.product?.productInsert?.sku}</h3>
-          <input type='text' name='newSku' value={productFields.newSku} onChange={handleChange} />
-          <button onClick={updateProductDetails}>+</button>
-          <br />
-          <h3>{product?.product?.productInsert?.preorder}</h3>
-          <input
-            type='text'
-            name='newPreorder'
-            value={productFields.newPreorder}
-            onChange={handleChange}
-          />
-          <button onClick={() => updateProductDetails()}>+</button>
-
-          <h3>
-            {product?.product?.productInsert?.color} - {product?.product?.productInsert?.colorHex}
-          </h3>
-          <input
-            type='text'
-            name='newColor'
-            value={productFields.newColor}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='newColorHEX'
-            value={productFields.newColorHEX}
-            onChange={handleChange}
-          />
-          <button onClick={updateProductDetails}>+</button>
-
-          <h3>{product?.product?.productInsert?.targetGender}</h3>
-          <ul>
-            {product?.sizes?.map((size, index) => (
-              <li key={index}>{getSizeName(size.sizeId)}</li>
-            ))}
-          </ul>
-        </div>
+        <ProductInformation
+          product={state.product}
+          productFields={state.productFields}
+          handleChange={handleChange}
+          updateProduct={updateProduct}
+          toggleHideProduct={toggleHideProduct}
+          deleteUpdatedTag={deleteUpdatedTag}
+          handleNewTagChange={handleNewTagChange}
+          getSizeName={getSizeName}
+          getMeasuremntName={getMeasuremntName}
+          handleSizeChange={handleSizeChange}
+          updateSizeQuantity={updateSizeQuantity}
+          handleMeasurementChange={handleMeasurementChange}
+          updateMeasurementValue={updateMeasurementValue}
+          sizeUpdates={state.sizeUpdates}
+          tags={state.tags}
+          genders={state.genders}
+          sizes={undefined}
+          measurements={undefined}
+        />
       </div>
     </Layout>
   );

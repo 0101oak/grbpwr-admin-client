@@ -1,10 +1,9 @@
 import React, { FC, useState, useEffect, MouseEvent } from 'react';
-import { Layout } from 'components/layout/layout';
+import { Layout } from 'components/login/layout';
 import {
   common_Product,
   common_FilterConditions,
   GetProductsPagedRequest,
-  common_OrderFactor,
 } from 'api/proto-http/admin';
 import { getProductsPaged, deleteProductByID } from 'api/admin';
 import { initialFilter } from './componentsOfPageProduct/initialFilterStates';
@@ -39,9 +38,7 @@ export const PageProduct: FC = () => {
         offset,
       });
 
-      setProducts((prevProducts) =>
-        response.products ? response.products.slice(0, newLimit) : [],
-      );
+      setProducts(response.products ? response.products.slice(0, newLimit) : []);
     } catch (error) {
       console.error(error);
     }
@@ -116,6 +113,7 @@ export const PageProduct: FC = () => {
             deleteProduct={handleDeleteClick}
             confirmDeleteProductId={confirmDelete}
             deletingProductId={deletingProductId}
+            showHidden={filter.showHidden}
           />
           <div className={styles.product_pagination}>
             <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage <= 1}>

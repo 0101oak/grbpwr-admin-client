@@ -1,133 +1,162 @@
-import React, { FC, useState, useEffect } from 'react';
-import {
-  common_Size,
-  common_MeasurementName,
-  common_ProductSizeInsert,
-  googletype_Decimal,
-  common_ProductNew,
-} from 'api/proto-http/admin';
-import { getDictionary } from 'api/admin';
+import React, { FC, useState } from 'react';
+import { googletype_Decimal, common_ProductNew, common_Dictionary } from 'api/proto-http/admin';
+import { findInDictionary } from 'components/managers/orders/utility';
 import styles from 'styles/addProd.scss';
 
 interface sizeProps {
   product: common_ProductNew;
   setProduct: React.Dispatch<React.SetStateAction<common_ProductNew>>;
+  dictionary: common_Dictionary | undefined;
 }
 
-export const Sizes: FC<sizeProps> = ({ product, setProduct }) => {
-  const [sizeEnum, setSizeEnum] = useState<common_Size[] | undefined>();
-  const [measurementEnum, setMeasurementEnum] = useState<common_MeasurementName[] | undefined>();
+interface SelectedMeasurements {
+  [sizeIndex: number]: number | undefined;
+}
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>, sizeIndex: number) => {
-    const { name, value } = e.target;
+function sortItems(item: { id?: number }[]) {
+  return [...(item || [])]
+    .filter((item) => item !== undefined)
+    .sort((a, b) => {
+      if (a.id !== undefined && b.id !== undefined) {
+        return a.id - b.id;
+      }
+      return 0;
+    });
+}
 
+export const Sizes: FC<sizeProps> = ({ setProduct, dictionary, product }) => {
+  const [selectedMeasurements, setSelectedMeasurements] = useState<SelectedMeasurements>({});
+  const sortedSizes = dictionary && dictionary.sizes ? sortItems(dictionary.sizes) : [];
+  const sortedMeasurements =
+    dictionary && dictionary.measurements ? sortItems(dictionary.measurements) : [];
+
+  const handleMeasurementSelection = (sizeIndex: number | undefined, measurementId: number) => {
+    if (typeof sizeIndex === 'undefined') {
+      return;
+    }
+    setSelectedMeasurements((prev) => ({ ...prev, [sizeIndex]: measurementId }));
+  };
+
+  const handleMeasurementValueChange = (
+    sizeIndex: number | undefined,
+    measurementId: number | undefined,
+    value: string,
+  ) => {
+    if (typeof sizeIndex === 'undefined') {
+      return;
+    }
     setProduct((prevProduct) => {
-      const updatedSizeMeasurements = [...(prevProduct.sizeMeasurements || [])];
-      const sizeQuantity: googletype_Decimal = { value: value };
+      const updatedProduct = JSON.parse(JSON.stringify(prevProduct));
 
-      if (!updatedSizeMeasurements[sizeIndex]) {
-        const sizeId = sizeIndex + 1;
+      if (!updatedProduct.sizeMeasurements) {
+        updatedProduct.sizeMeasurements = [];
+      }
 
-        const productSize: common_ProductSizeInsert = {
-          quantity: sizeQuantity,
-          sizeId: sizeId,
-        };
-
-        updatedSizeMeasurements[sizeIndex] = {
-          productSize: productSize,
-          measurements: [],
-        };
-      } else {
-        updatedSizeMeasurements[sizeIndex] = {
-          productSize: {
-            quantity: sizeQuantity,
-            sizeId: updatedSizeMeasurements[sizeIndex].productSize?.sizeId || sizeIndex,
-          },
+      if (!updatedProduct.sizeMeasurements[sizeIndex]) {
+        updatedProduct.sizeMeasurements[sizeIndex] = {
+          productSize: { sizeId: sizeIndex },
           measurements: [],
         };
       }
+
+      const measurementIndex = updatedProduct.sizeMeasurements[sizeIndex].measurements.findIndex(
+        (m: { measurementNameId: number }) => m.measurementNameId === measurementId,
+      );
+      if (measurementIndex === -1) {
+        updatedProduct.sizeMeasurements[sizeIndex].measurements.push({
+          measurementNameId: measurementId,
+          measurementValue: { value },
+        });
+      } else {
+        updatedProduct.sizeMeasurements[sizeIndex].measurements[measurementIndex].measurementValue =
+          { value };
+      }
+
+      return updatedProduct;
+    });
+  };
+
+  const handleSizeChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    sizeIndex: number | undefined,
+  ) => {
+    if (typeof sizeIndex === 'undefined') {
+      return;
+    }
+
+    const { value } = e.target;
+    setProduct((prevProduct) => {
+      const updatedSizeMeasurements = [...(prevProduct.sizeMeasurements || [])];
+      const sizeQuantity: googletype_Decimal = { value };
+
+      updatedSizeMeasurements[sizeIndex] = {
+        productSize: {
+          quantity: sizeQuantity,
+          sizeId: sizeIndex,
+        },
+        measurements: [],
+      };
 
       return { ...prevProduct, sizeMeasurements: updatedSizeMeasurements };
     });
   };
 
-  const handleMeasurementChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    sizeIndex: number,
-    measurementIndex: number,
-  ) => {
-    const { name, value } = e.target;
-
-    setProduct((prevProduct) => {
-      const updatedSizeMeasurements = [...(prevProduct.sizeMeasurements || [])];
-
-      if (updatedSizeMeasurements[sizeIndex]) {
-        const updatedMeasurements = [...(updatedSizeMeasurements[sizeIndex].measurements || [])];
-
-        const measurementValue: googletype_Decimal = { value: value };
-
-        updatedMeasurements[measurementIndex] = {
-          measurementNameId: measurementIndex + 1, // You may adjust this index based on your requirements
-          measurementValue: measurementValue,
-        };
-
-        updatedSizeMeasurements[sizeIndex] = {
-          ...updatedSizeMeasurements[sizeIndex],
-          measurements: updatedMeasurements,
-        };
-
-        return { ...prevProduct, sizeMeasurements: updatedSizeMeasurements };
-      }
-
-      return prevProduct;
-    });
-  };
-
-  useEffect(() => {
-    const fetchDictionary = async () => {
-      try {
-        const response = await getDictionary({});
-        const sizes = response.dictionary?.sizes;
-        const measurements = response.dictionary?.measurements;
-
-        setSizeEnum(sizes);
-        setMeasurementEnum(measurements);
-      } catch (error) {
-        console.error('Error fetching dictionary:', error);
-      }
-    };
-    fetchDictionary();
-  }, []);
-
   return (
     <div className={styles.product_container}>
       <label className={styles.title}>Sizes</label>
-      <div>
-        {sizeEnum?.map((size, sizeIndex) => (
-          <div key={sizeIndex}>
-            <label htmlFor={size.name}>{size.name}</label>
-            <input
-              type='number'
-              id={size.name}
-              name='quantity'
-              onChange={(e) => handleSizeChange(e, sizeIndex)}
-            />
-            <div>
-              {measurementEnum?.map((measurement, measurementIndex) => (
-                <div key={measurementIndex}>
-                  <label htmlFor={measurement.name}>{measurement.name}</label>
+      <ul className={styles.product_container_size_list}>
+        {sortedSizes.map((size) => (
+          <li key={size.id} className={styles.product_container_size_item}>
+            {size.id !== undefined && (
+              <>
+                <div className={styles.define_size_quantity_container}>
+                  <h3>{findInDictionary(dictionary, size.id, 'size')}</h3>
                   <input
-                    type='text'
-                    id={measurement.name}
-                    name='measurementValue'
-                    onChange={(e) => handleMeasurementChange(e, sizeIndex, measurementIndex)}
+                    type='number'
+                    name='quantity'
+                    onChange={(e) => handleSizeChange(e, size.id)}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
+                {product.sizeMeasurements &&
+                  product.sizeMeasurements[size.id] &&
+                  product.sizeMeasurements[size.id].productSize?.quantity?.value &&
+                  parseInt(
+                    product?.sizeMeasurements[size.id]?.productSize?.quantity?.value || '0',
+                    10,
+                  ) > 0 && (
+                    <div className={styles.define_measurement_container}>
+                      <select
+                        onChange={(e) =>
+                          handleMeasurementSelection(size.id, parseInt(e.target.value, 10))
+                        }
+                      >
+                        <option value=''>measurements</option>
+                        {sortedMeasurements.map((measurement) => (
+                          <option key={measurement.id} value={measurement.id}>
+                            {findInDictionary(dictionary, measurement.id, 'measurement')}
+                          </option>
+                        ))}
+                      </select>
+                      {selectedMeasurements[size.id as number] && (
+                        <input
+                          type='number'
+                          className={styles.measurementInput}
+                          onChange={(e) =>
+                            handleMeasurementValueChange(
+                              size.id,
+                              selectedMeasurements[size.id as number],
+                              e.target.value,
+                            )
+                          }
+                        />
+                      )}
+                    </div>
+                  )}
+              </>
+            )}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };

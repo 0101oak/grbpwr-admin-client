@@ -1,18 +1,13 @@
 import React, { FC, useState, useEffect } from 'react';
-import styles from 'styles/thumbnail.scss';
-import { deleteFiles, getAllUploadedFiles } from 'api/admin';
-import { common_ProductNew, common_ProductMediaInsert, common_Media } from 'api/proto-http/admin';
+import { common_Media } from 'api/proto-http/admin';
+import { addMediaByID, getAllUploadedFiles, deleteFiles } from 'api/admin';
 import { useNavigate } from '@tanstack/react-location';
 import { ROUTES } from 'constants/routes';
+import queryString from 'query-string';
+import styles from 'styles/addMediaById.scss';
 
-interface ThumbnailProps {
-  product: common_ProductNew;
-  setProduct: React.Dispatch<React.SetStateAction<common_ProductNew>>;
-}
-
-export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
+export const AddMediaByID: FC = () => {
   const navigate = useNavigate();
-  // const [product, setProduct] = useState<common_ProductNew>({ ...initialProductState, media: [] }); // to correct
   const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<string[]>([]);
   const [displayedImage, setDisplayedImage] = useState<string>('');
@@ -20,7 +15,8 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
   const [showMediaSelector, setShowMediaSelector] = useState(false);
   const [mediaNumber, setMediaNumber] = useState<number[]>([]);
-  const [imagesAdded, setImagesAdded] = useState(false);
+  const queryParams = queryString.parse(window.location.search);
+  const productId = queryParams.productId as string;
 
   const select = (imageUrl: string | number) => {
     if (typeof imageUrl === 'string') {
@@ -43,22 +39,15 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
   };
 
   function generateStringArray(input: string): string[] {
-    // Define a regular expression pattern to match the relevant part of the URL
     const pattern = /https:\/\/files\.grbpwr\.com\/(.+?)(-og\.(jpg|mp4|webm))?$/;
-
-    // Use the regular expression to extract the matched parts of the URL
     const match = input.match(pattern);
-
     if (!match) {
-      // Return an empty array if the input doesn't match the expected pattern
       return [];
     }
-
-    const [, path, , extension] = match; // Note the additional comma to skip the second capturing group
+    const [, path, , extension] = match;
     const resultArray: string[] = [`${path}-og.${extension}`];
 
     if (extension === 'jpg') {
-      // If the extension is 'jpg', add the '-compressed.jpg' version to the array
       resultArray.push(`${path}-compressed.jpg`);
     }
     console.log(resultArray);
@@ -67,7 +56,7 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
 
   const handleDeleteFile = async (fileIndex: number) => {
     try {
-      const fileToDelete = filesUrl[fileIndex]; // Assuming filesUrl is an array of file URLs
+      const fileToDelete = filesUrl[fileIndex];
       const objectKeys = generateStringArray(fileToDelete);
 
       if (objectKeys.length > 0) {
@@ -120,73 +109,29 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
     navigate({ to: ROUTES.media, replace: true });
   };
 
-  const handleImage = () => {
-    if (selectedImage.length > 0) {
-      const updatedMedia: common_ProductMediaInsert[] = [...(product.media || [])];
+  const handleAddMedia = async () => {
+    try {
+      if (selectedImage.length === 0) {
+        console.warn('No images selected.');
+        return;
+      }
 
-      selectedImage.forEach((imageUrl) => {
+      for (const imageUrl of selectedImage) {
         const compressedUrl = imageUrl.replace(/-og\.jpg$/, '-compressed.jpg');
-
-        updatedMedia.push({
+        const response = await addMediaByID({
+          productId: Number(productId),
           fullSize: imageUrl,
           thumbnail: imageUrl,
           compressed: compressedUrl,
         });
-      });
-
-      setProduct((prevProduct: common_ProductNew) => ({
-        ...prevProduct,
-        media: updatedMedia,
-      }));
-
-      setSelectedImage([]);
-      setShowMediaSelector(false);
-      setImagesAdded(true);
-    } else if (imageUrl.trim() !== '') {
-      setDisplayedImage(imageUrl);
-      const compressedUrl = imageUrl.replace(/-og\.jpg$/, '-compressed.jpg');
-
-      setProduct((prevProduct: common_ProductNew) => {
-        const updatedMedia: common_ProductMediaInsert[] = [...(prevProduct.media || [])];
-
-        updatedMedia.push({
-          fullSize: imageUrl,
-          thumbnail: imageUrl,
-          compressed: compressedUrl,
-        });
-
-        return {
-          ...prevProduct,
-          media: updatedMedia,
-        };
-      });
-
-      setImageUrl('');
-      setImagesAdded(true);
-    }
-  };
-
-  const handleDeleteMedia = (index: number) => {
-    if (product.media) {
-      const updatedMedia = [...product.media];
-
-      updatedMedia.splice(index, 1);
-
-      setProduct((prevProduct: common_ProductNew) => ({
-        ...prevProduct,
-        media: updatedMedia,
-      }));
+      }
+    } catch (error) {
+      console.error('Error adding media:', error);
     }
   };
 
   return (
     <div className={styles.thumbnail_wrapper}>
-      <label
-        htmlFor='thhumbnail'
-        className={`${styles.thumbnail_title} ${showMediaSelector ? styles.left : ''}`}
-      >
-        Media
-      </label>
       <div className={`${styles.thumbnail_container} ${showMediaSelector ? styles.left : ''}`}>
         <button
           className={`${styles.thumbnail_btn} ${thumbnailInput ? styles.by_url_left : ''}`}
@@ -204,9 +149,7 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
-            <button type='button' onClick={handleImage}>
-              OK
-            </button>
+            <button type='button'>OK</button>
           </div>
         )}
         <button className={styles.thumbnail_btn} type='button' onClick={handleViewAll}>
@@ -245,32 +188,10 @@ export const Thumbnail: FC<ThumbnailProps> = ({ product, setProduct }) => {
             ))}
           </ul>
           <div className={styles.media_selector_add}>
-            <button className={styles.add_btn} type='button' onClick={handleImage}>
-              add
+            <button className={styles.add_btn} type='button' onClick={handleAddMedia}>
+              add new one
             </button>
           </div>
-        </div>
-      )}
-      {showMediaSelector ? null : (
-        <div className={styles.added}>
-          {imagesAdded && product.media && product.media.length > 0 && (
-            <div className={styles.added_img_wrapper}>
-              <ul className={styles.added_img_container}>
-                {product.media.map((media, index) => (
-                  <li className={styles.added_img} key={index}>
-                    <button
-                      type='button'
-                      className={styles.delete_img}
-                      onClick={() => handleDeleteMedia(index)}
-                    >
-                      X
-                    </button>
-                    <img src={media.fullSize} alt={`Media ${index}`} className={styles.imgs} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>
