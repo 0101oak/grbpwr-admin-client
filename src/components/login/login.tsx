@@ -1,10 +1,10 @@
-import { FC, useState, ChangeEvent, FormEvent } from 'react';
-import { LoginResponse } from 'api/proto-http/auth';
-import { login } from 'api/auth';
-import { ROUTES } from 'constants/routes';
 import { useNavigate } from '@tanstack/react-location';
-import styles from 'styles/login-block.module.scss';
 import { getDictionary } from 'api/admin';
+import { login } from 'api/auth';
+import { LoginResponse } from 'api/proto-http/auth';
+import { ROUTES } from 'constants/routes';
+import { ChangeEvent, FC, FormEvent, useEffect, useState } from 'react';
+import styles from 'styles/login-block.module.scss';
 
 export const LoginBlock: FC = () => {
   const [password, setPassword] = useState('');
@@ -12,7 +12,14 @@ export const LoginBlock: FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      navigate({ to: ROUTES.main, replace: true });
+    }
+  }, [navigate]);
+
+  const handleLoginSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -34,7 +41,7 @@ export const LoginBlock: FC = () => {
 
       navigate({ to: ROUTES.main, replace: true });
     } catch (error) {
-      console.error(error);
+      setErrorMessage('error occured during login process');
     }
   };
 
@@ -49,10 +56,12 @@ export const LoginBlock: FC = () => {
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+    setErrorMessage('');
   };
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
+    setErrorMessage('');
   };
 
   return (
@@ -60,7 +69,7 @@ export const LoginBlock: FC = () => {
       <div className={styles.logo}></div>
       <div className={styles.card_body}>
         {errorMessage && <p className={styles.error}>{errorMessage}</p>}
-        <form className={styles.form} onSubmit={handlePasswordSubmit}>
+        <form className={styles.form} onSubmit={handleLoginSubmit}>
           <div className={styles.user_container}>
             <input
               className={styles.input}
@@ -79,7 +88,9 @@ export const LoginBlock: FC = () => {
               placeholder='PASSWORD'
             />
           </div>
-          <button type='submit'>Login</button>
+          <button type='submit' disabled={!username || !password}>
+            Login
+          </button>
         </form>
       </div>
     </div>

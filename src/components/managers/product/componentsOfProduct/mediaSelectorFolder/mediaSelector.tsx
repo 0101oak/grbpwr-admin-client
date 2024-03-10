@@ -1,23 +1,15 @@
-import React, { FC, useState, useEffect } from 'react';
+import { common_ProductNew } from 'api/proto-http/admin';
+import React, { FC, useEffect, useState } from 'react';
 import styles from 'styles/mediaSelector.scss';
-import { common_ProductNew, common_Media } from 'api/proto-http/admin';
 import { MediaPicker } from './mediaPicker';
 import { SelectedImages } from './selectedImages';
 
 interface MediaSelectorProps {
   product: common_ProductNew;
   setProduct: React.Dispatch<React.SetStateAction<common_ProductNew>>;
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => void;
 }
 
-export const MediaSelector: FC<MediaSelectorProps> = ({
-  product,
-  setProduct,
-  handleInputChange,
-}) => {
-  const [filesUrl, setFilesUrl] = useState<common_Media[]>([]);
+export const MediaSelector: FC<MediaSelectorProps> = ({ product, setProduct }) => {
   const [showMediaSelector, setShowMediaSelector] = useState(false);
   const [showAddedImages, setShowAddedImages] = useState(false);
 
@@ -68,14 +60,11 @@ export const MediaSelector: FC<MediaSelectorProps> = ({
         </div>
         {showMediaSelector && (
           <MediaPicker
-            filesUrl={filesUrl}
-            setFilesUrl={setFilesUrl}
             handleCloseMediaSelector={handleCloseMediaSelector}
             closeMediaPicker={closeMediaPicker}
             setProduct={setProduct}
             product={product}
             handleAddClick={handleAddClick}
-            handleInputChange={handleInputChange}
           />
         )}
       </div>

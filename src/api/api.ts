@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Origin': window.location.origin
   },
 });
 
@@ -18,7 +17,7 @@ axiosInstance.interceptors.request.use(
       config.headers = config.headers || {};
       config.headers['Grpc-Metadata-Authorization'] = `Bearer ${authToken}`;
     }
-        return config;
+    return config;
   },
   (error) => {
     return Promise.reject(error);
@@ -32,7 +31,6 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('authToken');
-      return Promise.reject((window.location.href = ROUTES.login));
     }
     return Promise.reject(error);
   },
@@ -45,15 +43,10 @@ interface AxiosRequestConfig {
 }
 
 export const axiosRequestHandler = async ({ path, method, body }: AxiosRequestConfig) => {
-  try {
-    const response = await axiosInstance({
-      method: method as 'GET' | 'POST' | 'PUT' | 'DELETE',
-      url: path,
-      data: body,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('api request error', error);
-    throw error;
-  }
+  const response = await axiosInstance({
+    method: method as 'GET' | 'POST' | 'PUT' | 'DELETE',
+    url: path,
+    data: body,
+  });
+  return response.data;
 };

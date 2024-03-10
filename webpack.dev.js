@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
-// eslint-disable-next-line no-undef
 const path = require('path');
 require('dotenv').config();
 
@@ -21,7 +18,7 @@ module.exports = {
         changeOrigin: true,
         target: process.env.REACT_APP_SERVER_URL,
         router: () => process.env.REACT_APP_API_BASE_URL || 'http://localhost:3999',
-      }
+      },
     ],
   },
 };
