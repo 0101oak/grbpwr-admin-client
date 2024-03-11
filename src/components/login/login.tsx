@@ -46,12 +46,8 @@ export const LoginBlock: FC = () => {
   };
 
   const fetchDictionary = async () => {
-    try {
-      const response = await getDictionary({});
-      localStorage.setItem('dictionary', JSON.stringify(response.dictionary));
-    } catch (error) {
-      console.error(error);
-    }
+    const response = await getDictionary({});
+    localStorage.setItem('dictionary', JSON.stringify(response.dictionary));
   };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {

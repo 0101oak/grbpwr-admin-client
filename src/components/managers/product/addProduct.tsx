@@ -162,11 +162,10 @@ export const AddProducts: FC = () => {
       };
 
       const response = await addProduct(productToDisplayInJSON);
-      console.log('Product added:', response);
+      alert('Product added');
       setProduct(initialProductState);
     } catch (error) {
       setProduct(initialProductState);
-      console.error('Error adding product:', error);
     }
   };
 

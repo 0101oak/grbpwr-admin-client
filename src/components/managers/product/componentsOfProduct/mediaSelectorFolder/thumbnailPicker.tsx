@@ -53,13 +53,8 @@ export const ThumbnailPicker: FC<ThumbnailPickerProps> = ({
   };
 
   const handleDeleteFile = async (id: number | undefined) => {
-    try {
-      const response = await deleteFiles({ id });
-      console.log(response);
-      setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
+    await deleteFiles({ id });
+    setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
   };
 
   useEffect(() => {

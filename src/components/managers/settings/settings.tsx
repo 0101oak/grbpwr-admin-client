@@ -65,32 +65,22 @@ export const Settings: FC = () => {
   };
 
   const handleShipmentCarrier = async (carrier: string | undefined, allow: boolean) => {
-    try {
-      const response = await setShipmentCarrier({
-        carrier: carrier,
-        allow,
-      });
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-    }
+    await setShipmentCarrier({
+      carrier: carrier,
+      allow,
+    });
   };
 
   const handleShipmentCarrierPrice = async (carrier: string | undefined) => {
     if (!carrier) {
-      console.log('error');
       return;
     }
     const newPrice = price[carrier];
     if (newPrice) {
-      try {
-        await setShipmentCarrierPrice({
-          carrier: carrier,
-          price: { value: newPrice },
-        });
-      } catch (error) {
-        console.error(error);
-      }
+      await setShipmentCarrierPrice({
+        carrier: carrier,
+        price: { value: newPrice },
+      });
     }
   };
 
@@ -98,7 +88,7 @@ export const Settings: FC = () => {
     if (carrier) {
       setPrice((prev) => ({ ...prev, [carrier]: price }));
     } else {
-      console.log('carrier not founf');
+      alert('carrier not found');
     }
   };
 

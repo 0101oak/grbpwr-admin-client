@@ -99,14 +99,10 @@ export const MediaPicker: FC = () => {
 
   const addNewHero = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await addHero({ main, ads, productIds });
-      console.log('hero added:', response);
-      setAds([]);
-      setProductIds([]);
-    } catch (error) {
-      console.error(error);
-    }
+
+    await addHero({ main, ads, productIds });
+    setAds([]);
+    setProductIds([]);
   };
 
   const select = (imageUrl: string | number) => {

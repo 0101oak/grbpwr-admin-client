@@ -10,7 +10,6 @@ export const AddMediaByID: FC = () => {
   const navigate = useNavigate();
   const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<string[]>([]);
-  const [displayedImage, setDisplayedImage] = useState<string>('');
   const [thumbnailInput, setThumbnailInput] = useState(false);
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
   const [showMediaSelector, setShowMediaSelector] = useState(false);
@@ -50,7 +49,6 @@ export const AddMediaByID: FC = () => {
     if (extension === 'jpg') {
       resultArray.push(`${path}-compressed.jpg`);
     }
-    console.log(resultArray);
     return resultArray;
   }
 

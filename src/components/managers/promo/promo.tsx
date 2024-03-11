@@ -30,7 +30,6 @@ export const Promo: FC = () => {
 
   const handleChange = (key: keyof PromoState, value: string | boolean | number) => {
     if (key === 'discount' && typeof value === 'number') {
-      // Ensure discount value is within the range of 0 to 99
       if (value < 0) {
         value = 0;
       } else if (value > 99) {
@@ -54,12 +53,7 @@ export const Promo: FC = () => {
       },
     };
 
-    try {
-      const response = await addPromo(promo);
-      console.log('promo added:', response);
-    } catch (error) {
-      console.error(error);
-    }
+    await addPromo(promo);
   };
 
   const navigateGetPromo = () => {

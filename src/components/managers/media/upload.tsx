@@ -76,13 +76,8 @@ export const UploadPage: FC = () => {
   };
 
   const deleteFile = async (id: number | undefined) => {
-    try {
-      const response = await deleteFiles({ id });
-      console.log(response);
-      setFilesUrl((currentFiles) => currentFiles.filter((file) => file.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
+    await deleteFiles({ id });
+    setFilesUrl((currentFiles) => currentFiles.filter((file) => file.id !== id));
   };
 
   const filteredAndPaginatedFiles = filesUrl?.filter((file) => {

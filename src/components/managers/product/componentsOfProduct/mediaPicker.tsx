@@ -1,8 +1,8 @@
+import { deleteFiles, getAllUploadedFiles } from 'api/admin';
+import { common_Media, common_ProductMediaInsert, common_ProductNew } from 'api/proto-http/admin';
 import React, { FC, useEffect, useState } from 'react';
 import styles from 'styles/mediaSelector.scss';
 import { DragDrop } from './dragDrop';
-import { deleteFiles, getAllUploadedFiles } from 'api/admin';
-import { common_Media, common_ProductMediaInsert, common_ProductNew } from 'api/proto-http/admin';
 import { InputField } from './inputFields';
 
 interface MediaSelectorProps {
@@ -100,13 +100,8 @@ export const MediaPicker: FC<MediaSelectorProps> = ({
   };
 
   const handleDeleteFile = async (id: number | undefined) => {
-    try {
-      const response = await deleteFiles({ id });
-      console.log(response);
-      setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
+    await deleteFiles({ id });
+    setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
   };
 
   useEffect(() => {

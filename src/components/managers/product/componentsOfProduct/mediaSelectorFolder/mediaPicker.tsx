@@ -90,13 +90,8 @@ export const MediaPicker: FC<MediaSelectorProps> = ({
   };
 
   const handleDeleteFile = async (id: number | undefined) => {
-    try {
-      const response = await deleteFiles({ id });
-      console.log(response);
-      setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
+    const response = await deleteFiles({ id });
+    setFilesUrl((currentFiles) => currentFiles?.filter((file) => file.id !== id));
   };
 
   useEffect(() => {
