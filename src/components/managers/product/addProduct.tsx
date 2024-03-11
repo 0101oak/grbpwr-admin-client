@@ -132,13 +132,9 @@ export const AddProducts: FC = () => {
       setDictionary(JSON.parse(storedDictionary));
     } else {
       const fetchDictionary = async () => {
-        try {
-          const response = await getDictionary({});
-          setDictionary(response.dictionary);
-          localStorage.setItem('dictionary', JSON.stringify(response.dictionary));
-        } catch (error) {
-          console.error(error);
-        }
+        const response = await getDictionary({});
+        setDictionary(response.dictionary);
+        localStorage.setItem('dictionary', JSON.stringify(response.dictionary));
       };
       fetchDictionary();
     }

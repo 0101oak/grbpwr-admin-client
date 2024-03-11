@@ -8,12 +8,8 @@ export const GetHero: FC = () => {
 
   useEffect(() => {
     const fetchHero = async () => {
-      try {
-        const response = await getHero({});
-        setHero(response.hero);
-      } catch (error) {
-        console.error(error);
-      }
+      const response = await getHero({});
+      setHero(response.hero);
     };
     fetchHero();
   }, []);

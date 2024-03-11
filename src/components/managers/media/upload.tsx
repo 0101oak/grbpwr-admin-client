@@ -51,28 +51,21 @@ export const UploadPage: FC = () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
     const limit = 2;
-    try {
-      const response = await getAllUploadedFiles({
-        limit: limit,
-        offset: offset,
-        orderFactor: 'ORDER_FACTOR_ASC',
-      });
-      const url = response.list || [];
-      const uniqueNewFiles = url.filter(
-        (newFile) =>
-          !filesUrl.some(
-            (existingFile) => existingFile.media?.fullSize === newFile.media?.fullSize,
-          ),
-      );
-      setFilesUrl((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
+    const response = await getAllUploadedFiles({
+      limit: limit,
+      offset: offset,
+      orderFactor: 'ORDER_FACTOR_ASC',
+    });
+    const url = response.list || [];
+    const uniqueNewFiles = url.filter(
+      (newFile) =>
+        !filesUrl.some((existingFile) => existingFile.media?.fullSize === newFile.media?.fullSize),
+    );
+    setFilesUrl((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
 
-      setOffset((prevOffset) => prevOffset + url.length);
-      setHasMore(url.length === limit);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    setOffset((prevOffset) => prevOffset + url.length);
+    setHasMore(url.length === limit);
+    setIsLoading(false);
   };
 
   const deleteFile = async (id: number | undefined) => {
@@ -102,11 +95,10 @@ export const UploadPage: FC = () => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
 
-      // Ascending order (older files first, 'minus')
       if (order === 'minus') {
         return dateA - dateB;
       }
-      // Descending order (newer files first, 'plus')
+
       return dateB - dateA;
     });
   }, [filteredAndPaginatedFiles, order]);

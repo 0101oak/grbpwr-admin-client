@@ -53,20 +53,11 @@ export const AddMediaByID: FC = () => {
   }
 
   const handleDeleteFile = async (fileIndex: number) => {
-    try {
-      const fileToDelete = filesUrl[fileIndex];
-      const objectKeys = generateStringArray(fileToDelete);
+    const fileToDelete = filesUrl[fileIndex];
 
-      if (objectKeys.length > 0) {
-        await deleteFiles({ id: fileIndex });
-        const updatedFiles = [...filesUrl];
-        updatedFiles.splice(fileIndex, 1);
-        setFilesUrl(updatedFiles);
-      } else {
-        console.error('Invalid file URL:', fileToDelete);
-      }
-    } catch (error) {
-      console.error('Error deleting file:', error);
+    if (fileToDelete) {
+      await deleteFiles({ id: fileIndex });
+      setFilesUrl((prevFilesUrl) => prevFilesUrl.filter((_, index) => index !== fileIndex));
     }
   };
 
@@ -80,20 +71,16 @@ export const AddMediaByID: FC = () => {
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
-      try {
-        const response = await getAllUploadedFiles({
-          limit: 5,
-          offset: 0,
-          orderFactor: 'ORDER_FACTOR_ASC',
-        });
+      const response = await getAllUploadedFiles({
+        limit: 5,
+        offset: 0,
+        orderFactor: 'ORDER_FACTOR_ASC',
+      });
 
-        const filesArray = response.list || [];
-        const urls = filesArray.map((file: common_Media) => file.media?.fullSize || '');
+      const filesArray = response.list || [];
+      const urls = filesArray.map((file: common_Media) => file.media?.fullSize || '');
 
-        setFilesUrl(urls);
-      } catch (error) {
-        console.error('Error fetching uploaded files:', error);
-      }
+      setFilesUrl(urls);
     };
 
     fetchUploadedFiles();
@@ -108,23 +95,19 @@ export const AddMediaByID: FC = () => {
   };
 
   const handleAddMedia = async () => {
-    try {
-      if (selectedImage.length === 0) {
-        console.warn('No images selected.');
-        return;
-      }
+    if (selectedImage.length === 0) {
+      alert('No images selected.');
+      return;
+    }
 
-      for (const imageUrl of selectedImage) {
-        const compressedUrl = imageUrl.replace(/-og\.jpg$/, '-compressed.jpg');
-        const response = await addMediaByID({
-          productId: Number(productId),
-          fullSize: imageUrl,
-          thumbnail: imageUrl,
-          compressed: compressedUrl,
-        });
-      }
-    } catch (error) {
-      console.error('Error adding media:', error);
+    for (const imageUrl of selectedImage) {
+      const compressedUrl = imageUrl.replace(/-og\.jpg$/, '-compressed.jpg');
+      await addMediaByID({
+        productId: Number(productId),
+        fullSize: imageUrl,
+        thumbnail: imageUrl,
+        compressed: compressedUrl,
+      });
     }
   };
 

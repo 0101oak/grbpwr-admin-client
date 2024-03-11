@@ -127,20 +127,16 @@ export const MediaPicker: FC = () => {
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
-      try {
-        const response = await getAllUploadedFiles({
-          limit: 5,
-          offset: 0,
-          orderFactor: 'ORDER_FACTOR_ASC',
-        });
+      const response = await getAllUploadedFiles({
+        limit: 5,
+        offset: 0,
+        orderFactor: 'ORDER_FACTOR_ASC',
+      });
 
-        const filesArray = response.list || [];
-        const urls = filesArray.map((file: common_Media) => file.media?.fullSize || '');
+      const filesArray = response.list || [];
+      const urls = filesArray.map((file: common_Media) => file.media?.fullSize || '');
 
-        setFilesUrl(urls);
-      } catch (error) {
-        console.error('Error fetching uploaded files:', error);
-      }
+      setFilesUrl(urls);
     };
 
     fetchUploadedFiles();
@@ -158,7 +154,6 @@ export const MediaPicker: FC = () => {
           handleMainExploreLink={handleMainExploreLinkChange}
           exploreLink={main.exploreLink}
         />
-        {/* TODO: remove unnessary properties in ads file */}
         <Ads
           filesUrl={filesUrl}
           selectedImage={selectedImage}

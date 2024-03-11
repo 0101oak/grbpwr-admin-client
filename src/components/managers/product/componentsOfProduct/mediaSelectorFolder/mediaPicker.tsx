@@ -114,45 +114,35 @@ export const MediaPicker: FC<MediaSelectorProps> = ({
     setIsLoading(true);
     setOffset(0);
     setHasMore(true);
-    try {
-      const response = await getAllUploadedFiles({
-        limit: 10,
-        offset: 0,
-        orderFactor: 'ORDER_FACTOR_ASC',
-      });
-      const newFiles = response.list || [];
-      setFilesUrl(newFiles); // Clearing filesUrl before setting new files
-      setOffset(newFiles.length);
-      setHasMore(newFiles.length > 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    const response = await getAllUploadedFiles({
+      limit: 10,
+      offset: 0,
+      orderFactor: 'ORDER_FACTOR_ASC',
+    });
+    const newFiles = response.list || [];
+    setFilesUrl(newFiles);
+    setOffset(newFiles.length);
+    setHasMore(newFiles.length > 0);
+    setIsLoading(false);
   };
 
   const fetchUploadedFiles = async () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
     const limit = 5;
-    try {
-      const response = await getAllUploadedFiles({
-        limit: limit,
-        offset: offset,
-        orderFactor: 'ORDER_FACTOR_ASC',
-      });
-      const newFiles = response.list || [];
-      const uniqueNewFiles = newFiles.filter((newFile) =>
-        filesUrl?.every((existingFile) => existingFile.media?.fullSize !== newFile.media?.fullSize),
-      );
-      setFilesUrl((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
-      setOffset((prevOffset) => prevOffset + uniqueNewFiles.length);
-      setHasMore(uniqueNewFiles.length === limit);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    const response = await getAllUploadedFiles({
+      limit: limit,
+      offset: offset,
+      orderFactor: 'ORDER_FACTOR_ASC',
+    });
+    const newFiles = response.list || [];
+    const uniqueNewFiles = newFiles.filter((newFile) =>
+      filesUrl?.every((existingFile) => existingFile.media?.fullSize !== newFile.media?.fullSize),
+    );
+    setFilesUrl((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
+    setOffset((prevOffset) => prevOffset + uniqueNewFiles.length);
+    setHasMore(uniqueNewFiles.length === limit);
+    setIsLoading(false);
   };
 
   return (
