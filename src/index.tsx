@@ -1,11 +1,4 @@
-import {
-  DefaultGenerics,
-  Outlet,
-  ReactLocation,
-  Route,
-  Router,
-  createMemoryHistory,
-} from '@tanstack/react-location';
+import { DefaultGenerics, Outlet, ReactLocation, Route, Router } from '@tanstack/react-location';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginBlock } from 'components/login/login';
 import { Main } from 'components/managers/MainContent';
@@ -20,6 +13,7 @@ import { UploadPage } from 'components/managers/media/upload';
 import { OrderId } from 'components/managers/orders/orderId';
 import { Orders } from 'components/managers/orders/orders';
 import { AddProducts } from 'components/managers/product/addProduct';
+import { ProductID } from 'components/managers/product/componentsOfPageProduct/productID';
 import { PageProduct } from 'components/managers/product/pageProduct';
 import { Product } from 'components/managers/product/product';
 import { GetPromo } from 'components/managers/promo/getPromo';
@@ -35,10 +29,12 @@ const root = createRoot(container);
 
 const queryClient = new QueryClient();
 
-const memoryHistory = createMemoryHistory({
-  initialEntries: ['/'],
-});
-const location = new ReactLocation({ history: memoryHistory });
+// const memoryHistory = createMemoryHistory({
+//   initialEntries: ['/'],
+// });
+// const location = new ReactLocation({ history: memoryHistory });
+
+const location = new ReactLocation();
 
 const routes: Route<DefaultGenerics>[] = [
   { path: ROUTES.login, element: <LoginBlock /> },
@@ -48,6 +44,7 @@ const routes: Route<DefaultGenerics>[] = [
   { path: ROUTES.product, element: <Product /> },
   { path: ROUTES.addProduct, element: <AddProducts /> },
   { path: ROUTES.pagedProduct, element: <PageProduct /> },
+  { path: ROUTES.singleProduct, element: <ProductID /> },
   { path: ROUTES.hero, element: <Hero /> },
   { path: ROUTES.addHero, element: <MediaPicker /> },
   { path: ROUTES.getHero, element: <GetHero /> },

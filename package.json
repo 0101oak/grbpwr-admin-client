@@ -52,6 +52,7 @@
   "dependencies": {
     "@tanstack/react-location": "^3.7.4",
     "@tanstack/react-query": "^5.24.1",
+    "@tanstack/react-router": "^1.19.4",
     "@types/lodash.add": "^3.7.9",
     "@types/react-color": "^3.0.7",
     "@types/react-router-dom": "^5.3.3",
@@ -73,7 +74,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-querystring": "^0.1.0",
     "react-router": "^6.22.2",
-    "react-router-dom": "^6.22.2",
+    "react-router-dom": "^6.22.3",
     "react-use-auth": "^2.1.0-14",
     "stream-browserify": "^3.0.0",
     "uuid": "^9.0.0"
