@@ -1,22 +1,25 @@
-import { useParams } from '@tanstack/react-router';
 import { getProductByID } from 'api/admin';
 import { common_ProductFull } from 'api/proto-http/admin';
-import { ROUTES } from 'constants/routes';
 import { FC, useEffect, useState } from 'react';
 
-export const ProductID: FC = () => {
-  const { productId }: any = useParams({ from: ROUTES.singleProduct });
+interface ProductIDProps {
+  params: {
+    id: string;
+  };
+}
+
+export const ProductID: FC<ProductIDProps> = ({ params }) => {
   const [product, setProduct] = useState<common_ProductFull>();
 
   useEffect(() => {
     const fetchProduct = async () => {
       const response = await getProductByID({
-        id: Number(productId),
+        id: Number(params.id),
       });
       setProduct(response.product);
     };
     fetchProduct();
-  }, [productId]);
+  }, [params.id]);
 
   return <div>{product?.product?.createdAt}</div>;
 };

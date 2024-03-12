@@ -37,7 +37,9 @@ export const Products: FC<ProductProps> = ({
                 e.stopPropagation();
                 deleteProduct(e, product.id);
               }}
-              style={{ backgroundColor: confirmDeleteProductId === product.id ? 'red' : 'initial' }}
+              style={{
+                backgroundColor: confirmDeleteProductId === product.id ? 'red' : 'initial',
+              }}
             >
               {confirmDeleteProductId === product.id ? 'Sure?' : 'X'}
             </button>
