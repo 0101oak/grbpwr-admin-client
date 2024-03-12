@@ -1,4 +1,11 @@
-import { DefaultGenerics, Outlet, ReactLocation, Route, Router } from '@tanstack/react-location';
+import {
+  DefaultGenerics,
+  Outlet,
+  ReactLocation,
+  Route,
+  Router,
+  createMemoryHistory,
+} from '@tanstack/react-location';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginBlock } from 'components/login/login';
 import { Main } from 'components/managers/MainContent';
@@ -29,12 +36,10 @@ const root = createRoot(container);
 
 const queryClient = new QueryClient();
 
-// const memoryHistory = createMemoryHistory({
-//   initialEntries: ['/'],
-// });
-// const location = new ReactLocation({ history: memoryHistory });
-
-const location = new ReactLocation();
+const memoryHistory = createMemoryHistory({
+  initialEntries: ['/'],
+});
+const location = new ReactLocation({ history: memoryHistory });
 
 const routes: Route<DefaultGenerics>[] = [
   { path: ROUTES.login, element: <LoginBlock /> },
