@@ -36,17 +36,12 @@ module.exports = {
       },
       {
         test: /\.(scss|css)$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader',
-          'sass-loader',
-        ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'sass-loader'],
       },
       {
         test: /\.svg$/,
-        type: 'asset/resource'
-      }
+        type: 'asset/resource',
+      },
     ],
   },
   plugins: [
@@ -59,6 +54,60 @@ module.exports = {
     new BundleStatsWebpackPlugin(),
     new Dotenv(),
   ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      minSize: 20000,
+      maxSize: 500000,
+      cacheGroups: {
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+        // Large libraries in separate chunks
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/,
+          name: 'react-vendor',
+          priority: 10,
+          chunks: 'all',
+        },
+        query: {
+          test: /[\\/]node_modules[\\/]@tanstack[\\/]react-query[\\/]/,
+          name: 'query-vendor',
+          priority: 10,
+          chunks: 'all',
+        },
+        ui: {
+          test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
+          name: 'ui-vendor',
+          priority: 10,
+          chunks: 'all',
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          priority: -10,
+          chunks: 'all',
+        },
+        common: {
+          name: 'common',
+          minChunks: 2,
+          priority: -30,
+          chunks: 'all',
+          reuseExistingChunk: true,
+        },
+      },
+    },
+    runtimeChunk: {
+      name: 'runtime',
+    },
+  },
+  performance: {
+    hints: isProduction ? 'warning' : false,
+    maxAssetSize: 512000, // 500 KiB
+    maxEntrypointSize: 512000, // 500 KiB
+  },
   // Conditionally add development configurations
   ...(isProduction ? {} : webpackDev),
 };

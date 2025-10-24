@@ -1,4 +1,4 @@
-import Selector from 'ui/components/selector';
+import Select from 'ui/components/select';
 import { FILTER_TYPES, FilterType, SORT_ORDERS, SortOrder } from '../utils/useFilter';
 
 interface FilterProps {
@@ -11,17 +11,17 @@ interface FilterProps {
 export function Filter({ type, order, setType, setOrder }: FilterProps) {
   return (
     <div>
-      <Selector
-        label='Media Type'
+      <Select
+        name='Media Type'
         value={type}
-        options={FILTER_TYPES.map((type) => ({ label: type, value: type }))}
-        onChange={(value) => setType(value)}
+        items={FILTER_TYPES.map((type) => ({ label: type, value: type }))}
+        onChange={(value: FilterType) => setType(value)}
       />
-      <Selector
-        label='Order'
+      <Select
+        name='Order'
         value={order}
-        options={SORT_ORDERS.map((order) => ({ label: order, value: order }))}
-        onChange={(value) => setOrder(value)}
+        items={SORT_ORDERS.map((order) => ({ label: order, value: order }))}
+        onChange={(value: SortOrder) => setOrder(value)}
       />
     </div>
   );

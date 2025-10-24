@@ -2,14 +2,14 @@ import { getBase64File } from 'lib/features/getBase64';
 import { cn } from 'lib/utility';
 import { useState } from 'react';
 import Input from 'ui/components/input';
-import Media from 'ui/components/media';
+import Text from 'ui/components/text';
 import { UploadedFile } from './upload-media';
 
 export function DragDrop({
-  uploadedFile,
+  className,
   setUploadedFile,
 }: {
-  uploadedFile: UploadedFile | null;
+  className?: string;
   setUploadedFile: React.Dispatch<React.SetStateAction<UploadedFile | null>>;
 }) {
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -72,46 +72,27 @@ export function DragDrop({
   };
 
   return (
-    <div className='w-full h-full space-y-4'>
-      <div
-        className={cn(
-          'flex items-center justify-center w-80 h-[400px] border-2 transition-colors ',
-          {
-            'border-1': isDragging,
-            'border-transparent': uploadedFile,
-          },
-        )}
-        onDragOver={(e) => handleDrag(e, true)}
-        onDragEnter={(e) => handleDrag(e, true)}
-        onDragLeave={(e) => handleDrag(e, false)}
-        onDrop={handleFileChange}
+    <div
+      className={cn('w-full', className)}
+      onDragOver={(e) => handleDrag(e, true)}
+      onDragEnter={(e) => handleDrag(e, true)}
+      onDragLeave={(e) => handleDrag(e, false)}
+      onDrop={handleFileChange}
+    >
+      <Text
+        component='label'
+        variant='uppercase'
+        className='cursor-pointer px-4 py-2 w-full sm:w-auto text-center'
       >
-        {!uploadedFile ? (
-          <div>
-            <label className='cursor-pointer border border-text rounded px-4 py-2 hover:bg-gray-100 w-full sm:w-auto text-center'>
-              DRAG AND DROP YOUR MEDIA HERE
-              <Input
-                name='files'
-                type='file'
-                accept='image/*, video/*'
-                onChange={handleFileChange}
-                className='hidden'
-              />
-            </label>
-          </div>
-        ) : (
-          <div className='w-80 h-[400px]  border border-black'>
-            <Media
-              src={uploadedFile.base64Url}
-              alt={uploadedFile.file?.name ?? ''}
-              type={uploadedFile.type}
-              controls={uploadedFile.type === 'video'}
-              className='w-full h-full'
-              aspectRatio='auto'
-            />
-          </div>
-        )}
-      </div>
+        drag and drop your media here
+        <Input
+          name='files'
+          type='file'
+          accept='image/*, video/*'
+          onChange={handleFileChange}
+          className='hidden'
+        />
+      </Text>
     </div>
   );
 }

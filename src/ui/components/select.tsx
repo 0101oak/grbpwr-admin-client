@@ -5,30 +5,41 @@ import { cn } from 'lib/utility';
 import Text from 'ui/components/text';
 import { Arrow } from 'ui/icons/arrow';
 
-export default function SelectComponent({
+export default function SelectComponent<T extends string | number = string | number>({
   name,
   items,
   className,
   customWidth,
   fullWidth,
   renderValue,
+  onChange,
   ...props
 }: {
   name: string;
-  items: { value: string | number; label: string }[];
+  items: { value: T; label: string }[];
   className?: string;
   customWidth?: number;
   fullWidth?: boolean;
   renderValue?: (
-    selectedValue: string | number,
-    selectedItem: { label: string; value: string | number } | undefined,
+    selectedValue: T,
+    selectedItem: { label: string; value: T } | undefined,
   ) => React.ReactNode;
+  onChange?: (value: T) => void;
   [k: string]: any;
 }) {
   const [open, setOpen] = useState(false);
 
+  const handleValueChange = (value: string) => {
+    if (onChange) {
+      const hasNumberValues = items.some((item) => typeof item.value === 'number');
+      const convertedValue =
+        hasNumberValues && !isNaN(Number(value)) ? (Number(value) as T) : (value as T);
+      onChange(convertedValue);
+    }
+  };
+
   return (
-    <Select.Root {...props} open={open} onOpenChange={setOpen}>
+    <Select.Root {...props} open={open} onOpenChange={setOpen} onValueChange={handleValueChange}>
       <SelectTrigger
         placeholder={props.placeholder}
         className={className}
@@ -70,7 +81,7 @@ export function SelectItem({ children, className, ref, ...props }: any) {
 
 SelectItem.displayName = Select.Item.displayName;
 
-export function SelectTrigger({
+export function SelectTrigger<T extends string | number = string | number>({
   children,
   placeholder,
   className,
@@ -83,11 +94,11 @@ export function SelectTrigger({
   placeholder: string;
   className?: string;
   renderValue?: (
-    selectedValue: string | number,
-    selectedItem: { label: string; value: string | number } | undefined,
+    selectedValue: T,
+    selectedItem: { label: string; value: T } | undefined,
   ) => React.ReactNode;
-  value?: string | number;
-  items?: { label: string; value: string | number }[];
+  value?: T;
+  items?: { label: string; value: T }[];
   isOpen?: boolean;
 }) {
   let displayValue = null;
